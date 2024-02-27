@@ -1,6 +1,10 @@
 package com.comera.gallery.ui.activity
 
+import android.database.ContentObserver
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.MediaStore
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -27,15 +31,45 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
-import com.comera.gallery.model.MediaItem
+import com.comera.gallery.domain.MediaItem
 import com.comera.gallery.theme.GalleryAppTheme
 import com.comera.gallery.ui.viewmodel.GalleryViewModel
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     private val viewModel: GalleryViewModel by viewModels()
 
+    private val contentObserver = object : ContentObserver(Handler(Looper.getMainLooper())) {
+        override fun onChange(selfChange: Boolean) {
+            viewModel.loadMediaItems()
+        }
+    }
+
+    private fun registerImagesContentProvider() {
+        contentResolver.registerContentObserver(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            true,
+            contentObserver
+        )
+    }
+
+    private fun registerVideosContentProvider() {
+        contentResolver.registerContentObserver(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            true,
+            contentObserver
+        )
+    }
+
+    private fun unregisterContentProvider() {
+        contentResolver.unregisterContentObserver(contentObserver)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        registerImagesContentProvider()
+        registerVideosContentProvider()
         setContent {
             GalleryAppTheme {
                 // A surface container using the 'background' color from the theme
@@ -47,6 +81,11 @@ class MainActivity : ComponentActivity() {
                 }
             }
         }
+    }
+
+    override fun onDestroy() {
+        unregisterContentProvider()
+        super.onDestroy()
     }
 }
 
@@ -62,11 +101,12 @@ fun GalleryScreen(viewModel: GalleryViewModel) {
     ) {
         items(albums.keys.toList()) {
 
-            val mediaItemsForAlbum = albums.get(it)
+            val mediaItemsForAlbum = albums[it]
             if (mediaItemsForAlbum != null) {
                 MediaItemCard(
                     it,
-                    mediaItemsForAlbum
+                    mediaItemsForAlbum,
+                    viewModel
                 ) { (viewModel::onClickAlbum)(it, mediaItemsForAlbum) }
             }
         }
@@ -75,8 +115,14 @@ fun GalleryScreen(viewModel: GalleryViewModel) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MediaItemCard(id: Long, mediaItemsForAlbum: List<MediaItem>, onClick:() -> Unit) : Unit {
-    val albumName = mediaItemsForAlbum[0].bucketName
+fun MediaItemCard(
+    id: Long,
+    mediaItemsForAlbum: List<MediaItem>,
+    viewModel: GalleryViewModel,
+    onClick: () -> Unit
+) {
+    val albumName =
+        if (id == viewModel.ALL_IMAGES_BUCKET_ID) "All Images" else mediaItemsForAlbum[0].bucketName
     val mediaItemCount = mediaItemsForAlbum.size
     val uriLatestMediaItem = mediaItemsForAlbum[0].contentUri
     Card(

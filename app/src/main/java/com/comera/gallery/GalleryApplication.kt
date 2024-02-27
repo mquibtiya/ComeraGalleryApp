@@ -1,6 +1,7 @@
 package com.comera.gallery
 
 import android.app.Application
+import dagger.hilt.android.HiltAndroidApp
 
-class GalleryApplication : Application() {
-}
+@HiltAndroidApp
+class GalleryApplication : Application()
