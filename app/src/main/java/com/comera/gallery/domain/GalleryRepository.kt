@@ -3,8 +3,8 @@ package com.comera.gallery.domain
 import android.database.ContentObserver
 
 interface GalleryRepository {
-    fun loadImages(): List<MediaItem>
-    fun loadVideos(): List<MediaItem>
+    suspend fun loadImages(): List<MediaItem>
+    suspend fun loadVideos(): List<MediaItem>
 
     fun registerMediaContentProvider(contentObserver: ContentObserver)
 

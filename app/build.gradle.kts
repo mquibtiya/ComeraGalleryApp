@@ -46,6 +46,11 @@ android {
     composeOptions {
         kotlinCompilerExtensionVersion = "1.4.3"
     }
+    testOptions {
+        // Used for Unit testing Android dependent elements in /test folder
+        unitTests.isIncludeAndroidResources = true
+        unitTests.isReturnDefaultValues = true
+    }
 }
 
 dependencies {
@@ -74,7 +79,6 @@ dependencies {
     // Dagger hilt
     implementation("com.google.dagger:hilt-android:2.49")
     implementation("androidx.test:core-ktx:1.5.0")
-//    kapt("com.google.dagger:hilt-compiler:2.48.1")
     kapt("com.google.dagger:hilt-android-compiler:2.48.1")
 
     implementation("androidx.appcompat:appcompat:1.6.1")
@@ -91,17 +95,15 @@ dependencies {
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
-//    androidTestImplementation("androidx.test:core-ktx:1.4.0")
 
 
     // Mockito
-    testImplementation("org.mockito:mockito-core:3.11.2")
+    testImplementation("org.mockito:mockito-inline:3.11.2")
     androidTestImplementation("org.mockito:mockito-android:4.5.0")
 
     // For LiveData testing
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
-//    androidTestImplementation("androidx.test.ext:junit:1.1.3")
     androidTestImplementation("androidx.arch.core:core-testing:2.2.0")
 
 

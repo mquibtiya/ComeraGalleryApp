@@ -10,7 +10,7 @@ import com.comera.gallery.domain.MediaItem
 
 class GalleryRepoImpl(val context: Context) : GalleryRepository {
 
-    override fun loadImages(): List<MediaItem> {
+    override suspend fun loadImages(): List<MediaItem> {
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
             MediaStore.Images.Media.DISPLAY_NAME,
@@ -34,7 +34,7 @@ class GalleryRepoImpl(val context: Context) : GalleryRepository {
         return parseCursor(cursor, false)
     }
 
-    override fun loadVideos(): List<MediaItem> {
+    override suspend fun loadVideos(): List<MediaItem> {
         val projection = arrayOf(
             MediaStore.Video.Media._ID,
             MediaStore.Video.Media.DISPLAY_NAME,

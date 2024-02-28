@@ -11,16 +11,18 @@ import com.comera.gallery.domain.usecases.LoadVideosUsecase
 import com.comera.gallery.domain.usecases.ObserveContentProviderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.annotations.TestOnly
 import javax.inject.Inject
 
 @HiltViewModel
 class GalleryViewModel @Inject constructor(
     val loadImagesUseCase: LoadImagesUsecase,
     val loadVideosUseCase: LoadVideosUsecase,
-    val registerContentProviderUseCase: ObserveContentProviderUseCase
+    private val observeContentProviderUseCase: ObserveContentProviderUseCase
 ) : ViewModel() {
 
     private val _albumMap = MutableStateFlow<MutableMap<Long, List<MediaItem>>>(mutableMapOf())
@@ -29,6 +31,7 @@ class GalleryViewModel @Inject constructor(
 
     private var allImages = listOf<MediaItem>()
     private var allVideos = listOf<MediaItem>()
+    private var _allMediaItems = listOf<MediaItem>()
 
     val ALL_IMAGES_BUCKET_ID: Long = 923645
     val ALL_VIDEOS_BUCKET_ID: Long = 765643
@@ -42,18 +45,26 @@ class GalleryViewModel @Inject constructor(
 
 
     init {
-        registerContentProviderUseCase.registerContentProvider(contentObserver)
+        observeContentProviderUseCase.registerContentProvider(contentObserver)
         loadMediaItems()
     }
 
     fun loadMediaItems() {
         viewModelScope.launch(Dispatchers.IO) {
-            allImages = loadImagesUseCase()
-            allVideos = loadVideosUseCase()
+            allImages = async(Dispatchers.IO) {
+                loadImagesUseCase()
+            }.await()
+            allVideos = async(Dispatchers.IO) {
+                loadVideosUseCase()
+            }.await()
 
             val allMediaItems = mutableListOf<MediaItem>()
-            allMediaItems.addAll(allImages)
-            allMediaItems.addAll(allVideos)
+            if (allImages.isNotEmpty())
+                allMediaItems.addAll(allImages)
+            if (allVideos.isNotEmpty())
+                allMediaItems.addAll(allVideos)
+
+            _allMediaItems = allMediaItems
 
             _albumMap.value = allMediaItems.groupBy {
                 it.bucketId
@@ -71,7 +82,21 @@ class GalleryViewModel @Inject constructor(
 
 
     override fun onCleared() {
-        registerContentProviderUseCase.unregisterContentProvider(contentObserver)
+        observeContentProviderUseCase.unregisterContentProvider(contentObserver)
         super.onCleared()
+    }
+
+    @TestOnly
+    fun getAllImages(): List<MediaItem> {
+        return allImages
+    }
+
+    @TestOnly
+    fun getAllVideos(): List<MediaItem> {
+        return allVideos
+    }
+
+    fun getAllMediaItems(): List<MediaItem> {
+        return _allMediaItems
     }
 }
