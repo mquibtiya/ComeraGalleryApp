@@ -1,4 +1,4 @@
-package com.comera.gallery.ui.composable
+package com.comera.gallery.presentation.ui.composable
 
 import android.net.Uri
 import androidx.compose.foundation.Image

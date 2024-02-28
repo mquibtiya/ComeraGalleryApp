@@ -2,6 +2,7 @@ package com.comera.gallery.data
 
 import android.content.ContentUris
 import android.content.Context
+import android.database.ContentObserver
 import android.net.Uri
 import android.provider.MediaStore
 import com.comera.gallery.domain.GalleryRepository
@@ -88,5 +89,32 @@ class GalleryRepoImpl(val context: Context) : GalleryRepository {
             return mediaItems
         }
         return emptyList()
+    }
+
+
+    override fun registerMediaContentProvider(contentObserver: ContentObserver) {
+        registerImagesContentProvider(contentObserver)
+        registerVideosContentProvider(contentObserver)
+    }
+
+    override fun unregisterMediaContentProvider(contentObserver: ContentObserver) {
+        context.contentResolver.unregisterContentObserver(contentObserver)
+    }
+
+
+    private fun registerImagesContentProvider(contentObserver: ContentObserver) {
+        context.contentResolver.registerContentObserver(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            true,
+            contentObserver
+        )
+    }
+
+    private fun registerVideosContentProvider(contentObserver: ContentObserver) {
+        context.contentResolver.registerContentObserver(
+            MediaStore.Video.Media.EXTERNAL_CONTENT_URI,
+            true,
+            contentObserver
+        )
     }
 }

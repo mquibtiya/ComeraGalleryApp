@@ -1,8 +1,8 @@
-package com.comera.gallery.ui.composable
+package com.comera.gallery.presentation.ui.composable
 
 import androidx.compose.runtime.Composable
 import com.comera.gallery.domain.MediaItem
-import com.comera.gallery.ui.viewmodel.GalleryViewModel
+import com.comera.gallery.presentation.viewmodel.GalleryViewModel
 
 
 @Composable
