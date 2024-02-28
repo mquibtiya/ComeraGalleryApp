@@ -20,7 +20,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.comera.gallery.presentation.viewmodel.GalleryViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AlbumDetailView(
     navController: NavController,
@@ -34,17 +33,12 @@ fun AlbumDetailView(
         else -> mediaItemsList[0].bucketName
     }
     Column(modifier = Modifier.fillMaxWidth()) {
-        TopAppBar(
-            title = { Text(text = albumName) },
-            navigationIcon = {
-                IconButton(onClick = {
-                    navController.navigateUp()
-                }
-                ) {// go back to album view
-                    Icon(Icons.Default.ArrowBack, "Back Button")
-                }
-            }
+        GalleryAppBar(
+            title = albumName,
+            showBackButton = true,
+            navController = navController
         )
+
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             horizontalArrangement = Arrangement.spacedBy(16.dp),
@@ -60,5 +54,22 @@ fun AlbumDetailView(
             }
         }
     }
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun GalleryAppBar(title: String, showBackButton: Boolean, navController: NavController) {
+    TopAppBar(
+        title = { Text(text = title) },
+        navigationIcon = {
+            if (showBackButton) {
+                IconButton(onClick = {
+                    navController.navigateUp()
+                }
+                ) {// go back to album view
+                    Icon(Icons.Default.ArrowBack, "Back Button")
+                }
+            }
+        }
+    )
 }

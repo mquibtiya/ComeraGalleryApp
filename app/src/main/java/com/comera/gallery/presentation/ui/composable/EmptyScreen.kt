@@ -18,8 +18,5 @@ fun EmptyScreen() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(text = "No Photos Found!")
-        Button(onClick = {  }) {
-            Text(text = "No Photos Found!")
-        }
     }
 }
