@@ -86,6 +86,18 @@ dependencies {
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 
+    //testing dependencies
+    //Testing
+    testImplementation("org.mockito:mockito-core:4.5.0")
+    testImplementation("com.google.truth:truth:1.1")
+    testImplementation("io.mockk:mockk:1.12.0")
+
+    // For Robolectric tests.
+    testImplementation("com.google.dagger:hilt-android-testing:2.28-alpha")
+    // For instrumented tests.
+    androidTestImplementation("com.google.dagger:hilt-android-testing:2.28-alpha")
+    // ...with Kotlin.
+    kaptTest("com.google.dagger:hilt-android-compiler:2.48.1")
 
     // Mockito
     testImplementation("org.mockito:mockito-inline:3.11.2")
@@ -94,14 +106,10 @@ dependencies {
     // For LiveData testing
     testImplementation("androidx.arch.core:core-testing:2.2.0")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
-//    androidTestImplementation("androidx.arch.core:core-testing:2.2.0")
-
 
     //compose
     androidTestImplementation(platform("androidx.compose:compose-bom:2023.03.00"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
-//    debugImplementation("androidx.compose.ui:ui-tooling")
-//    debugImplementation("androidx.compose.ui:ui-test-manifest")
 }
 kapt {
     correctErrorTypes = true

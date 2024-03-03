@@ -1,93 +1,83 @@
 package com.comera.gallery.ui.viewmodel
 
-import androidx.arch.core.executor.testing.InstantTaskExecutorRule
-import com.comera.gallery.domain.MediaItem
+import android.net.Uri
 import com.comera.gallery.domain.usecases.LoadImagesUsecase
 import com.comera.gallery.domain.usecases.LoadVideosUsecase
+import com.comera.gallery.domain.usecases.MockGalleryRepo
 import com.comera.gallery.domain.usecases.ObserveContentProviderUseCase
 import com.comera.gallery.presentation.viewmodel.GalleryViewModel
+import io.mockk.every
+import io.mockk.mockk
+import io.mockk.mockkStatic
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mock
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
-import org.mockito.MockitoAnnotations
 import org.mockito.junit.MockitoJUnitRunner
 
 @ExperimentalCoroutinesApi
 @RunWith(MockitoJUnitRunner::class)
 class GalleryViewModelTest {
 
-    @get:Rule
-    val instantExecutorRule = InstantTaskExecutorRule()
-
-    @Mock
+    private lateinit var loadImagesUsecase: LoadImagesUsecase
+    private lateinit var loadVideosUsecase: LoadVideosUsecase
+    private lateinit var observeContentProviderUseCase: ObserveContentProviderUseCase
     private lateinit var galleryViewModel: GalleryViewModel
-
-    @Mock
-    private var loadImagesUseCase: LoadImagesUsecase = mock(LoadImagesUsecase::class.java)
-
-    @Mock
-    private var loadVideosUseCase: LoadVideosUsecase = mock(LoadVideosUsecase::class.java)
-
-    @Mock
-    private var observeContentProviderUseCase: ObserveContentProviderUseCase =
-        mock(ObserveContentProviderUseCase::class.java)
 
     @Before
     fun setUp() {
-        MockitoAnnotations.openMocks(this)
+
+        mockkStatic(Uri::class)
+        every { Uri.parse(any()) } returns mockk()
 
         // Initialize ViewModel with mocked use cases
+        val mockGalleryRepo = MockGalleryRepo()
+        loadImagesUsecase = LoadImagesUsecase(mockGalleryRepo)
+        loadVideosUsecase = LoadVideosUsecase(mockGalleryRepo)
+        observeContentProviderUseCase = ObserveContentProviderUseCase(mockGalleryRepo)
+
         galleryViewModel =
-            GalleryViewModel(loadImagesUseCase, loadVideosUseCase, observeContentProviderUseCase)
+            GalleryViewModel(loadImagesUsecase, loadVideosUsecase, observeContentProviderUseCase)
     }
 
 
     @Test
     fun `test loadMediaItems`() = runBlocking {
         // Given
-        val fakeImages = listOf(mock(MediaItem::class.java))
-        val fakeVideos = listOf(mock(MediaItem::class.java))
-
-        // Stub the use cases
-        `when`(loadImagesUseCase.invoke()).thenReturn(fakeImages)
-        `when`(loadVideosUseCase.invoke()).thenReturn(fakeVideos)
-
-        // When
         galleryViewModel.loadMediaItems()
 
-        delay(2000)
+        delay(600)
 
-        // Then
-        assertEquals(fakeImages, galleryViewModel.getAllImages())
-        assertEquals(fakeVideos, galleryViewModel.getAllVideos())
-        assertEquals(fakeImages + fakeVideos, galleryViewModel.getAllMediaItems())
+        val imageList = galleryViewModel.getAllImages()
+        assertEquals(imageList.size, 3)
+
+        val videoList = galleryViewModel.getAllVideos()
+        assertEquals(videoList.size, 3)
+
+        assertEquals(galleryViewModel.albumMap.value.size, 5) // All Images and All Videos so +2
     }
 
 
-    /*@Test
+    @Test
     fun `test getMediaItemsForAlbum`() = runBlocking {
         // Given
-        val fakeMediaItems = listOf<MediaItem>(mock(MediaItem::class.java))
+        galleryViewModel.loadMediaItems()
+
+        delay(600)
+
+        val fakeMediaItems = galleryViewModel.getAllMediaItems()
         val fakeAlbumId = fakeMediaItems[0].bucketId
 
-        // Mock the album map
-        val mockAlbumMap = mutableMapOf<Long, List<MediaItem>>()
-        `when`(mockAlbumMap[fakeAlbumId]).thenReturn(fakeMediaItems)
+        val albumMap = fakeMediaItems.filter { it.bucketId == fakeAlbumId }
 
         // When
         val result = galleryViewModel.getMediaItemsForAlbum(fakeAlbumId)
 
-        delay(1000)
-
         // Then
-        assertEquals(fakeMediaItems, result)
-    }*/
+        assertEquals(albumMap, result)
+        assertEquals(result?.size, 2)
+    }
 }
