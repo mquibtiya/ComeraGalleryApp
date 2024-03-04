@@ -91,6 +91,7 @@ dependencies {
     testImplementation("org.mockito:mockito-core:4.5.0")
     testImplementation("com.google.truth:truth:1.1")
     testImplementation("io.mockk:mockk:1.12.0")
+    androidTestImplementation("io.mockk:mockk:1.12.0")
 
     // For Robolectric tests.
     testImplementation("com.google.dagger:hilt-android-testing:2.28-alpha")
